@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.rotadibuteco.app",
+        "sha256_cert_fingerprints": ["B1:0B:25:C7:AB:75:95:54:8F:27:05:BD:41:B8:CD:8B:E8:5E:84:DD:88:0E:B1:38:AF:7C:9F:7F:9A:33:8E:12"]
+      }
+    }]

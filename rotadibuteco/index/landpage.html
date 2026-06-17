@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rota di Buteco 2026 🍺</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍺</text></svg>"/>
+<meta name="theme-color" content="#E8650A"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<link rel = "stylesheet" href="../css/base.css">
+<link rel = "stylesheet" href="../css/base.css">
+<link rel = "stylesheet" href="../css/base.css">
+<link rel = "stylesheet" href="../css/base.css">
+</head>
+<body>
+<div class="notif" id="notif"></div>
+
+<div id="politicaOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:var(--z-modal);align-items:center;justify-content:center;padding:20px">
+  <div style="text-align:center;padding:8px;margin-bottom:16px">
+  <div style="font-size:0.7rem;color:#bbb;font-family:'Nunito',sans-serif">Rota di Buteco BH 2026 · v1.0</div>
+</div>
+  <div style="background:white;border-radius:20px;padding:24px;max-width:420px;width:100%;max-height:85vh;overflow-y:auto;position:relative">
+    <button onclick="document.getElementById('politicaOverlay').style.display='none'" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#888">✕</button>
+    <div style="font-family:'Bebas Neue',cursive;font-size:1.4rem;color:#5C2E00;letter-spacing:1px;margin-bottom:4px">🍺 Política de Privacidade</div>
+    <div style="font-size:0.72rem;color:#aaa;margin-bottom:16px">Rota di Buteco BH 2026 · Última atualização: 19 de abril de 2026</div>
+    <div style="font-size:0.82rem;color:#444;line-height:1.6">
+      <p style="font-weight:800;color:#5C2E00;margin-bottom:4px">1. Quem somos</p>
+      <p style="margin-bottom:12px">O Rota di Buteco é um aplicativo criado para acompanhar visitas aos bares participantes do Comida di Buteco BH 2026. É um projeto independente, sem fins lucrativos, desenvolvido para uso entre grupos de amigos.</p>
+      <p style="font-weight:800;color:#5C2E00;margin-bottom:4px">2. Dados que coletamos</p>
+      <p style="margin-bottom:4px">Ao criar uma conta, coletamos:</p>
+      <ul style="margin-left:16px;margin-bottom:12px">
+        <li>Nome escolhido por você</li><li>Endereço de e-mail (usado apenas para login)</li>
+        <li>Avatar (emoji ou foto que você escolher e enviar)</li><li>Bares que você marcar como visitados</li>
+        <li>Notas e comentários que você registrar</li><li>Km informados por você</li>
+      </ul>
+      <p style="font-weight:800;color:#5C2E00;margin-bottom:4px">3. Como usamos seus dados</p>
+      <p style="margin-bottom:12px">Seus dados são usados exclusivamente para gerar rankings, estatísticas e o feed de atividades visíveis aos outros participantes do app. Seu e-mail <strong>nunca é exibido</strong> para outros usuários.</p>
+      <p style="font-weight:800;color:#5C2E00;margin-bottom:4px">4. O que é visível para outros usuários</p>
+      <ul style="margin-left:16px;margin-bottom:12px">
+        <li>Seu nome</li><li>Seu avatar ou foto de perfil</li><li>Bares visitados e notas dadas</li>
+        <li>Comentários que você escrever</li><li>Km rodados e estatísticas gerais</li><li>Emblemas conquistados</li>
+      </ul>
+      <p style="font-weight:800;color:#5C2E00;margin-bottom:4px">5. Onde seus dados ficam</p>
+      <p style="margin-bottom:12px">Os dados são armazenados no Google Firebase (Firestore, Authentication e Storage), com servidores nos Estados Unidos. Fotos de perfil e visitas ficam armazenadas no Firebase Storage.</p>
+      <p style="font-weight:800;color:#5C2E00;margin-bottom:4px">6. Seus direitos (LGPD)</p>
+      <ul style="margin-left:16px;margin-bottom:12px">
+        <li>Acessar seus dados a qualquer momento</li><li>Corrigir dados incorretos</li>
+        <li>Excluir sua conta e todos os seus dados incluindo fotos — disponível na aba Perfil</li>
+      </ul>
+      <p style="font-weight:800;color:#5C2E00;margin-bottom:4px">7. Contato</p>
+      <p style="margin-bottom:4px">Dúvidas: <strong>henriquesouza1832001@gmail.com</strong></p>
+    </div>
+    <button onclick="document.getElementById('politicaOverlay').style.display='none'" style="width:100%;margin-top:20px;padding:12px;border-radius:12px;background:#5C2E00;color:white;border:none;font-size:0.9rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">Entendi</button>
+  </div>
+</div>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-logo">🍺 ROTA DI BUTECO</div>
+  <div class="login-sub">Comida di Buteco · BH 2026</div>
+  <div class="login-card">
+    <h2 id="loginTitle">Entrar</h2>
+    <input class="input-field" id="nomeInput" type="text" placeholder="Seu nome" style="display:none"/>
+<input class="input-field" id="emailInput" type="email" placeholder="seu@email.com"/>
+<input class="input-field" id="senhaInput" type="password" placeholder="Senha"/>
+<input class="input-field" id="senha2Input" type="password" placeholder="Confirme sua senha" style="display:none"/>
+    <button class="btn-login" id="btnLogin" onclick="window.fazerLogin()">Entrar</button>
+    <button class="btn-cadastro" id="btnCadastro" onclick="window.toggleCadastro()">Criar conta</button>
+    <div id="avisoLgpd" style="display:none;font-size:0.75rem;color:#888;text-align:center;margin-top:10px;line-height:1.5">
+      Ao criar sua conta você concorda que seu nome, avatar e estatísticas de visitas serão visíveis aos outros participantes do app.
+    </div>
+    <button id="btnReset" onclick="window.abrirResetSenha()" style="background:none;border:none;color:#aaa;font-size:0.78rem;cursor:pointer;font-family:'Nunito',sans-serif;width:100%;text-align:center;margin-bottom:8px;display:none">🔑 Esqueci minha senha</button>
+    <div class="login-msg" id="loginMsg"></div>
+    <div style="margin-top:16px;text-align:center;display:flex;flex-direction:column;gap:8px">
+  <button onclick="document.getElementById('politicaOverlay').style.display='flex'" style="background:none;border:none;color:#aaa;font-size:0.72rem;cursor:pointer;font-family:'Nunito',sans-serif;text-decoration:underline">Política de Privacidade</button>
+  <button onclick="window.open('https://wa.me/5531988924409?text=Ol%C3%A1%20Henrique!%20Preciso%20de%20ajuda%20para%20recuperar%20minha%20conta%20no%20Rota%20di%20Buteco%20%F0%9F%8D%BA','_blank')" style="background:none;border:none;color:#aaa;font-size:0.72rem;cursor:pointer;font-family:'Nunito',sans-serif;text-decoration:underline">Não consegue entrar? Fale com o suporte</button>
+</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">🍺 Rota di Buteco <span>BH 2026</span></div>
+      <div class="user-info">
+        <span class="user-name" id="headerNome"></span>
+        <button class="btn-logout" onclick="window.fazerLogout()">Sair</button>
+<button id="btnAdmin" onclick="window.abrirAdmin()" style="display:none;background:none;border:1px solid #FFD700;color:#FFD700;padding:4px 10px;border-radius:20px;font-size:0.75rem;cursor:pointer;margin-left:4px">🛡️</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="window.irPara('ranking')"><span class="tab-icon">🏆</span>Ranking</div>
+      <div class="tab" onclick="window.irPara('bares')"><span class="tab-icon">🍺</span>Bares</div>
+      <div class="tab" onclick="window.irPara('feed')"><span class="tab-icon">📰</span>Feed</div>
+      <div class="tab" onclick="window.irPara('roteiro')"><span class="tab-icon">🗺️</span>Roteiro</div>
+      <div class="tab" onclick="window.irPara('proximos')"><span class="tab-icon">📍</span>Próximos</div>
+      <div class="tab" onclick="window.irPara('amstel')"><span class="tab-icon">🍺</span>Amstel</div>
+      <div class="tab" onclick="window.irPara('perfil')"><span class="tab-icon">👤</span>Perfil</div>
+      <div class="tab" onclick="window.irPara('downloads')"><span class="tab-icon">📲</span>App</div>
+    </div>
+  </div>
+
+  <div class="page active" id="page-ranking">
+    <div class="filtro-global-btn">
+      <button class="ativo" id="btnGlobal" onclick="window.setVistaGlobal(true)">🌍 Global</button>
+      <button class="inativo" id="btnGrupo" onclick="window.setVistaGlobal(false)">👥 Meu Grupo</button>
+    </div>
+    <div id="desafioDia"></div>
+    <div id="contadorEvento"></div>
+    <div class="ranking-tabs" id="rankingTabs"></div>
+    <div id="rankingConteudo"><div class="empty"><div class="empty-icon">⏳</div><p>Carregando...</p></div></div>
+  </div>
+
+  <div class="page" id="page-bares">
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input type="text" id="buscaInput" placeholder="Buscar bar ou prato..." oninput="window.filtrarBares()"/>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+  <button id="filtroTodos" onclick="window.setFiltroVisita('todos')" style="flex:1;padding:8px;border-radius:10px;background:var(--marrom);color:white;border:2px solid var(--marrom);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">Todos</button>
+  <button id="filtroNaoVisitados" onclick="window.setFiltroVisita('nao')" style="flex:1;padding:8px;border-radius:10px;background:transparent;color:var(--marrom);border:2px solid var(--marrom);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">🍺 Faltam</button>
+  <button id="filtroVisitados" onclick="window.setFiltroVisita('sim')" style="flex:1;padding:8px;border-radius:10px;background:transparent;color:var(--marrom);border:2px solid var(--marrom);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">✅ Visitados</button>
+</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+  <button id="btnOrdemNormal" onclick="window.setOrdemBares('normal')" style="flex:1;padding:8px;border-radius:10px;background:var(--marrom);color:white;border:2px solid var(--marrom);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">📋 Normal</button>
+  <button id="btnOrdemTop" onclick="window.setOrdemBares('top')" style="flex:1;padding:8px;border-radius:10px;background:transparent;color:var(--marrom);border:2px solid var(--marrom);font-size:0.8rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">⭐ Melhores</button>
+</div>
+<div class="filtros" id="filtrosRegiao"></div>
+    <button onclick="window.abrirModalExtras()" style="width:100%;padding:9px;border-radius:10px;background:var(--marrom);color:white;border:none;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:12px">➕ Registrar bar fora do roteiro</button>
+    <div class="contador-bares" id="contadorBares"></div>
+    <div id="listaBares"></div>
+  </div>
+
+  <div class="page" id="page-feed">
+    <div class="search-box" style="margin-bottom:10px">
+      <span class="icon">🔍</span>
+      <input type="text" id="feedBusca" placeholder="Buscar no feed..." oninput="window.filtrarFeed()"/>
+    </div>
+    <div class="filtro-global-btn">
+      <button class="ativo" id="btnFeedGlobal" onclick="window.setFeedFiltro('global')">🌍 Global</button>
+      <button class="inativo" id="btnFeedGrupo" onclick="window.setFeedFiltro('grupo')">👥 Grupo</button>
+    </div>
+    <div id="feedLista"><div class="empty"><div class="empty-icon">⏳</div><p>Carregando feed...</p></div></div>
+  </div>
+
+<div class="page" id="page-roteiro">
+  <div id="roteiroConteudo"></div>
+</div>
+
+<div class="page" id="page-amstel">
+  <div id="amstelConteudo"><div class="empty"><div class="empty-icon">🍺</div><p>Carregando...</p></div></div>
+</div>
+
+<div class="page" id="page-proximos">
+  <div class="toggle-vista">
+    <button class="ativo" id="btnVistaLista" onclick="window.setVistaProximos('lista')">📋 Lista</button>
+    <button class="inativo" id="btnVistaMapa" onclick="window.setVistaProximos('mapa')">🗺️ Mapa</button>
+  </div>
+  <div id="proximosConteudo">
+    <div class="empty"><div class="empty-icon">📍</div><p>Carregando sua localização...</p></div>
+  </div>
+  <div id="mapaLeaflet" style="display:none"></div>
+</div>
+
+<div class="page" id="page-perfil">
+  <div class="perfil-card">
+    <div class="perfil-avatar" id="perfilAvatar" onclick="window.abrirEdicaoAvatar()" style="cursor:pointer" title="Clique para mudar avatar">🍺</div>
+    <div class="perfil-nome" id="perfilNome" style="cursor:pointer" onclick="window.editarNome()" title="Clique para editar seu nome"></div>
+    <div class="perfil-email" id="perfilEmail"></div>
+    <div id="perfilTelefone" style="font-size:0.78rem;color:var(--cinza);margin-bottom:16px;cursor:pointer"></div>
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-val" id="statVisitas">0</div><div class="stat-label">Bares visitados</div></div>
+      <div class="stat-item"><div class="stat-val" id="statMedia">-</div><div class="stat-label">Nota média</div></div>
+      <div class="stat-item"><div class="stat-val" id="statKm">0</div><div class="stat-label">Km rodados</div></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px">
+    <button onclick="window.setAbaPerfil('stats')" id="abaStats" style="flex-shrink:0;padding:8px 16px;border-radius:20px;background:var(--marrom);color:white;border:2px solid var(--marrom);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">📊 Stats</button>
+    <button onclick="window.setAbaPerfil('fotos')" id="abaFotos" style="flex-shrink:0;padding:8px 16px;border-radius:20px;background:transparent;color:var(--marrom);border:2px solid var(--marrom);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">📷 Fotos</button>
+    <button onclick="window.setAbaPerfil('emblemas')" id="abaEmblemas" style="flex-shrink:0;padding:8px 16px;border-radius:20px;background:transparent;color:var(--marrom);border:2px solid var(--marrom);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">🎖️ Emblemas</button>
+    <button onclick="window.setAbaPerfil('grupo')" id="abaGrupo" style="flex-shrink:0;padding:8px 16px;border-radius:20px;background:transparent;color:var(--marrom);border:2px solid var(--marrom);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">👥 Grupo</button>
+    <button onclick="window.setAbaPerfil('config')" id="abaConfig" style="flex-shrink:0;padding:8px 16px;border-radius:20px;background:transparent;color:var(--marrom);border:2px solid var(--marrom);font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">⚙️ Config</button>
+  </div>
+  <div id="abaPerfilConteudo"></div>
+</div>
+
+<div class="page" id="page-downloads">
+  <div id="downloadsConteudo"></div>
+</div>
+
+  <div id="perfilPublicoPage">
+    <div style="padding:16px;max-width:600px;margin:0 auto">
+      <button class="btn-voltar-perfil" onclick="window.fecharPerfilPublico()">← Voltar</button>
+      <div id="perfilPublicoConteudo"></div>
+    </div>
+  </div>
+  <button id="btnTopo" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:24px;right:16px;width:44px;height:44px;border-radius:50%;background:var(--marrom);color:white;border:none;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:100">↑</button>
+</div>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script href="../js/admin.js"></script>
+<script href="../js/amstel.js"></script>
+<script href="../js/auth.js"></script>
+<script href="../js/bares.js"></script>
+<script href="../js/data.js"></script>
+<script href="../js/feed.js"></script>
+<script href="../js/firebase.js"></script>
+<script href="../js/grupos.js"></script>
+<script href="../js/login.js"></script>
+<script href="../js/mapa.js"></script>
+<script href="../js/perfil.js"></script>
+<script href="../js/ranking.js"></script>
+<script href="../js/renders.js"></script>
+<script href="../js/visitas.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Firebase — gerado automaticamente pelo CLI
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+
+.env
+.env.local
+.env.*.local
+
+# js/firebase.js
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code
+.vscode/settings.json
+
+.well-known/signing.keystore >> .gitignore
+.well-known/signing-key-info.txt >> .gitignore
+.well-known/Rota di Buteco.apk" >> .gitignore
+.well-known/Rota di Buteco.aab" >> .gitignore.

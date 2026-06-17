@@ -1,0 +1,10 @@
+.login-msg{font-size:0.82rem;color:var(--laranja);text-align:center;margin-top:8px;min-height:20px}
+.login-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--marrom);padding:30px 20px}
+.login-logo{font-family:'Bebas Neue',cursive;font-size:3rem;color:var(--laranja);letter-spacing:4px;text-align:center}
+.login-sub{color:#ccc;font-size:0.9rem;text-align:center;margin-bottom:40px}
+.login-card{background:white;border-radius:20px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+.login-card h2{font-size:1.1rem;font-weight:800;color:var(--marrom);margin-bottom:20px;text-align:center}
+.input-field{width:100%;padding:12px 14px;border:2px solid #e0d0c0;border-radius:10px;font-size:0.95rem;font-family:'Nunito',sans-serif;outline:none;color:var(--marrom);margin-bottom:12px}
+.input-field:focus{border-color:var(--laranja)}
+.btn-login{width:100%;padding:13px;border-radius:12px;background:var(--laranja);color:white;border:none;font-size:1rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:10px}
+.btn-cadastro{width:100%;padding:13px;border-radius:12px;background:transparent;color:var(--marrom);border:2px solid var(--marrom);font-size:0.9rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}

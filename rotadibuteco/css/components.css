@@ -1,0 +1,47 @@
+.bar-card{background:white;border-radius:14px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;border-left:4px solid var(--laranja)}
+.bar-card.visitado{border-left-color:var(--verde)}
+.bar-header{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 14px 10px;cursor:pointer}
+.bar-nome{font-size:1rem;font-weight:800;color:var(--marrom);line-height:1.2;flex:1}
+.bar-regiao-badge{font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:10px;white-space:nowrap;margin-left:8px;background:#f0e0d0;color:var(--marrom);flex-shrink:0}
+.bar-info{padding:0 14px 14px;transition:opacity 0.2s ease;}
+.bar-prato{font-size:0.88rem;color:var(--laranja);font-weight:700;margin-bottom:4px}
+.bar-prato::before{content:"🍽 "}
+.bar-preco{font-size:0.82rem;color:var(--verde);font-weight:700;margin-bottom:4px}
+.bar-end{font-size:0.78rem;color:var(--cinza);line-height:1.4;margin-bottom:10px}
+.bar-end::before{content:"📍 "}
+.bar-acoes{display:flex;gap:8px;flex-wrap:wrap}
+.btn-visitar{flex:1;min-width:120px;padding:8px 12px;border-radius:10px;border:2px solid var(--verde);background:transparent;color:var(--verde);font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px}
+.btn-visitar.visitado-btn{background:var(--verde);color:white}
+.btn-site{padding:8px 12px;border-radius:10px;border:2px solid var(--laranja);background:transparent;color:var(--laranja);font-size:0.8rem;font-weight:700;font-family:'Nunito',sans-serif;text-decoration:none;display:flex;align-items:center;gap:4px}
+.btn-site:hover{background:var(--laranja);color:white}
+.btn-enviar-desc{padding:6px 14px;border-radius:8px;background:var(--laranja);color:white;border:none;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:6px}
+.btn-aprovar{padding:5px 12px;border-radius:8px;background:var(--verde);color:white;border:none;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+.btn-recusar{padding:5px 12px;border-radius:8px;background:transparent;color:#cc0000;border:1px solid #cc0000;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+.btn-voltar-perfil{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--marrom);font-size:0.9rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:16px;padding:0}
+.estrelas{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
+.btn-like{display:flex;align-items:center;gap:5px;background:none;border:1.5px solid #e0d0c0;border-radius:20px;padding:5px 12px;font-size:0.8rem;font-weight:700;color:var(--cinza);cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.2s}
+.btn-like.liked{background:#fff0e8;border-color:var(--laranja);color:var(--laranja)}
+.btn-like:hover{border-color:var(--laranja);color:var(--laranja)}
+.btn-logout{background:none;border:1px solid #555;color:#ccc;padding:4px 10px;border-radius:20px;font-size:0.75rem;cursor:pointer}
+.tabs{display:flex;background:#3d1e00}
+.btn-maps{padding:8px 10px;border-radius:10px;border:2px solid #4285f4;background:transparent;color:#4285f4;font-size:0.8rem;font-weight:700;text-decoration:none;display:flex;align-items:center}
+.btn-maps:hover{background:#4285f4;color:white}
+.btn-salvar-nota{width:100%;padding:9px;border-radius:10px;background:var(--laranja);color:white;border:none;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:6px}
+.btn-add-extra{width:100%;padding:10px;border-radius:10px;background:var(--marrom);color:white;border:none;font-size:0.9rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+.btn-grupo{width:100%;padding:10px;border-radius:10px;font-size:0.88rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:8px}
+.btn-criar-grupo{background:var(--marrom);color:white;border:none}
+.btn-entrar-grupo{background:transparent;color:var(--laranja);border:2px solid var(--laranja)}
+.btn-upload-foto{width:100%;padding:10px;border-radius:10px;border:2px dashed var(--laranja);background:transparent;color:var(--laranja);font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:8px}
+.estrela{font-size:1.3rem;cursor:pointer;opacity:0.3;transition:all 0.15s}
+.estrela.on{opacity:1}
+.ranking-item{background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.emblema-card{background:white;border-radius:12px;padding:12px;box-shadow:var(--shadow);text-align:center;opacity:0.35;transition:all 0.3s}
+.emblema-card.conquistado{opacity:1;border:2px solid var(--laranja)}
+.feed-card{background:white;border-radius:14px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.feed-card-header{display:flex;align-items:center;gap:10px;padding:12px 14px 8px;cursor:pointer}
+.search-box{position:relative;margin-bottom:14px}
+.search-box input{width:100%;padding:12px 16px 12px 42px;border:2px solid #e0d0c0;border-radius:12px;font-size:0.95rem;font-family:'Nunito',sans-serif;background:white;color:var(--marrom);outline:none;transition:border 0.2s}
+.search-box input:focus{border-color:var(--laranja)}
+.search-box .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1.1rem}
+.filtro-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:2px solid var(--laranja);background:transparent;color:var(--laranja);font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:'Nunito',sans-serif;white-space:nowrap}
+.filtro-btn.active{background:var(--laranja);color:white}
