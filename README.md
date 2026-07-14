@@ -1,8 +1,8 @@
-# Trilha BH
+# Rota di Buteco 2026
 
-O tour gastronômico colaborativo de Belo Horizonte. O usuário cria um perfil, registra visitas a bares e botequins, avalia com nota e comentário, compete em rankings por oito categorias diferentes e forma grupos com amigos. É independente e sem fins lucrativos.
+PWA social para acompanhar a jornada no Comida di Buteco BH 2026 — evento gastronômico anual com 128 bares participantes em Belo Horizonte. O app ficou ativo durante todo o evento (12/04 a 10/05) e foi usado por um grupo de amigos com ranking competitivo em tempo real.
 
-> Versão atual: Pré Beta 1.0. Plataforma: PWA + Android (Capacitor).
+> Status: encerrado. Dados preservados no Firebase.
 
 ---
 
@@ -13,12 +13,9 @@ O tour gastronômico colaborativo de Belo Horizonte. O usuário cria um perfil, 
 - [As funcionalidades, uma por uma](#as-funcionalidades-uma-por-uma)
 - [Segurança](#segurança)
 - [Banco de dados — coleções do Firestore](#banco-de-dados--coleções-do-firestore)
-- [Sistema de emblemas](#sistema-de-emblemas)
+- [Emblemas](#emblemas)
 - [Estrutura de arquivos](#estrutura-de-arquivos)
 - [Como rodar localmente](#como-rodar-localmente)
-- [Build Android](#build-android)
-- [Deploy](#deploy)
-- [O que ainda não está redondo](#o-que-ainda-não-está-redondo)
 
 ---
 
@@ -28,151 +25,105 @@ O tour gastronômico colaborativo de Belo Horizonte. O usuário cria um perfil, 
 |---|---|
 | Auth | Firebase Authentication (email/senha) |
 | Banco | Cloud Firestore (tempo real) |
-| Arquivos | Firebase Storage (fotos de visita e avatar) |
+| Arquivos | Firebase Storage (fotos de visita) |
 | Hosting | Firebase Hosting |
-| Mapa | Leaflet.js + OpenStreetMap |
-| Android | Capacitor |
+| Mapa | Leaflet.js 1.9.4 |
+| Fonte | Bebas Neue + Nunito (Google Fonts) |
 | Offline | Service Worker (PWA) |
 
-Sem framework de frontend. Cada tela é HTML/CSS/JS puro, servido estaticamente. Isso mantém o projeto inteiro gerenciável por uma pessoa só, sem etapa de build, sem toolchain para aprender. O custo é a ausência de reatividade automática de UI: cada tela cuida manualmente de re-renderizar o que mudou depois de uma ação do usuário.
+Não tem framework de frontend. É HTML/CSS/JS puro servido estaticamente pelo Firebase Hosting. A escolha foi pragmática: o projeto precisava sair rápido, ser instalável no celular e funcionar bem para um grupo pequeno de usuários. Adicionar React ou Vue teria sido overhead sem benefício claro para essa escala.
 
-O Capacitor entrou para gerar a versão Android sem reescrever o app. O PWA já era instalável, mas a Play Store exige um APK — o Capacitor empacota o mesmo HTML/JS numa webview nativa sem precisar reescrever nada.
+O Firebase veio pelo tempo real no ranking e no feed. A cada check-in, todo mundo que está com o app aberto vê o movimento aparecer sem precisar recarregar a página — isso foi central para a dinâmica competitiva do evento.
 
 ---
 
 ## Como as peças se encaixam
 
 ```
-Navegador (PWA) / App Android (Capacitor + WebView)
+Navegador (PWA instalável)
    │
-   ├─ Service Worker: shell do app em cache local,
-   │  chamadas ao Firebase passam sem interceptação
+   ├─ Service Worker: guarda o shell do app em cache,
+   │  chamadas ao Firebase passam direto
    │
    ▼
 Firebase Authentication
-   │ usuário autenticado (ou anônimo com dados no localStorage)
+   │ usuário autenticado
    ▼
-Cloud Firestore (listeners em tempo real)
+Cloud Firestore (leitura em tempo real via listeners)
    │
-   ├─ Descobrir: lista de estabelecimentos com filtros
-   ├─ Ranking: cache em ranking/{uid}, recalculado a cada visita
-   ├─ Feed: array de até 200 eventos em ranking/feed
-   ├─ Grupos: ranking e feed filtrados por membros
-   └─ XP: pontuação por período em xp/{uid}
+   ├─ Ranking: atualizado a cada check-in de qualquer usuário
+   ├─ Feed: array de até 200 eventos no documento ranking/feed
+   └─ Visitas: subcoleção por usuário, com foto no Storage
 ```
 
-Leitura usa `onSnapshot` em tempo real onde faz sentido (feed, ranking do grupo) e fetch pontual onde a sincronia em tempo real não agrega nada (lista de bares, perfil próprio). Escrita vai direto para o Firestore, sem backend intermediário.
+O dado viaja em duas direções. Para leitura, o app usa listeners do Firestore (`onSnapshot`) que mantêm ranking e feed sincronizados em tempo real sem polling. Para escrita, cada ação do usuário (check-in, nota, registro de km e gasto) grava diretamente nas coleções relevantes, e os listeners de todos os outros usuários recebem a atualização automaticamente.
 
 ---
 
 ## As funcionalidades, uma por uma
 
-### Descobrir
-Tela principal. Lista todos os bares com filtros por região (Sul, Centro, Leste, Nordeste, Noroeste, Norte, Oeste), tipo (bar, cervejaria, sinuca) e vibes (samba, rock, pet friendly, LGBTQ+, acessível e outros 20 filtros). Busca por texto no nome, endereço ou qualquer característica do bar. Barra de progresso mostra o percentual da trilha concluída.
+### Bares
+Lista com os 128 bares do evento, organizados por região de BH (Sul, Centro, Leste, Nordeste, Noroeste, Norte, Oeste). Tem filtro por região, busca por nome/prato/endereço, ordenação por nota média do grupo e integração com Google Maps para navegação. É possível também registrar bares extras fora do roteiro oficial.
 
-### Mapa
-Bares ordenados por distância via geolocalização, com mapa Leaflet/OpenStreetMap. Pins verdes para visitados, laranja para não visitados. Mostra também quais membros do grupo já foram em cada bar, o que ajuda a decidir o roteiro do dia.
-
-### Feed
-Feed de atividades colaborativo com visitas, avaliações, fotos e emblemas conquistados por todos os usuários. Filtro entre feed global e feed do grupo. Suporta reações por emoji, comentários nas postagens e denúncia de conteúdo para moderação.
-
-### Roteiros
-Organiza uma rota de bares para o dia com o grupo: mapa interativo com a ordem dos bares, botão para abrir no Google Maps, barra de progresso coletivo e sistema de sugestões com aprovação pelo organizador antes de entrar no roteiro oficial do grupo.
+### Visitas (check-in)
+O núcleo do app. Cada visita exige foto tirada na hora pela câmera — galeria bloqueada por design, para evitar trapaça no ranking. Junto com a foto, o usuário registra nota de 1 a 10, km percorridos, valor gasto e um comentário que aparece no feed. É permitido múltiplas visitas no mesmo bar, com histórico separado para cada.
 
 ### Ranking
-Oito categorias de ranking em tempo real:
+Nove categorias calculadas em tempo real:
 
 | Categoria | Critério |
 |---|---|
-| 🏆 Mais visitados | Quantidade de bares diferentes |
-| ⭐ Nota média | Média das avaliações dadas |
-| 🚗 Km rodados | Distância percorrida registrada |
-| 🧭 Mais regiões | Número de regiões distintas visitadas |
-| 🎯 % da trilha | Percentual dos bares cobertos |
-| 🔍 Crítico | Quem deu as notas mais baixas (o mais exigente) |
-| 💰 Maior gasto | Total gasto registrado nos bares |
-| 🗺️ Dominadores | Quem completou mais regiões inteiras |
+| 🏆 Visitados | Quem foi em mais bares |
+| ⭐ Nota Média | Melhores avaliações |
+| 🚗 Km | Quem mais rodou |
+| 🧭 Explorador | Mais regiões visitadas |
+| 🎯 Fiel | % dos bares visitados |
+| 🔍 Exigente | Crítico mais severo |
+| 💰 Gastão | Maior gasto nos bares |
+| ⏰ Madrugador | Primeiro a registrar cada bar |
+| 🗺️ Regiões | Quem completou mais regiões inteiras |
 
-Vista global ou restrita ao grupo. Compartilhamento via WhatsApp. Pódio animado no topo. Ranking temporal (mês, ano, hall da fama) com sistema de XP acumulado.
-
-### Perfil
-Estatísticas pessoais (bares, nota média, km, gasto total, dias ativos), mapa de regiões de BH com progresso visual, emblemas conquistados, histórico de visitas com fotos, avatar editável (emoji ou foto), gerenciamento de grupo e botão para sugerir um bar que ainda não está cadastrado.
+### Feed Social
+Feed de atividades em tempo real com reações por emoji (🍺 🔥 😍 🤢), fotos das visitas dos amigos, e filtro entre feed global e feed do grupo. Quando alguém do seu grupo visita um bar, uma notificação aparece.
 
 ### Grupos
-O usuário cria ou entra num grupo por código. O grupo tem ranking próprio, feed filtrado, progresso coletivo por região e sistema de desafios com prazo e placar entre membros.
+Criar e entrar em grupos por código de 6 caracteres. O grupo tem ranking próprio separado do global, feed filtrado só para membros, e roteiro colaborativo onde qualquer um pode sugerir um bar — a sugestão vai para aprovação do organizador antes de entrar no roteiro.
 
-### Trilhas temáticas
-Agrupamentos curados de bares por tema — cervejaria, sinuca, Comida di Buteco e outros. Cada trilha tem progresso individual e um emblema desbloqueado ao completar todos os bares dela.
+### Mapa
+Lista de bares ordenada por distância usando GPS, com mapa interativo via Leaflet/OpenStreetMap. Pins verdes para bares já visitados, laranja para os que ainda não foram.
 
-### Sistema de emblemas
-18 emblemas no total. 10 desbloqueados por quantidade de bares visitados (de 1 a 1000) e 8 por completar todas as regiões. Cada conquista gera uma notificação com animação de confete e opção de compartilhar.
+### Amstel
+Ranking separado de consumo de Amstel nos bares participantes. O usuário envia foto da comanda para aprovação pelo admin antes de o registro ser contabilizado. Havia um prêmio misterioso para quem bebesse mais.
 
-### Modo anônimo
-O app funciona sem cadastro. Dados ficam só no `localStorage`. Depois de 5 minutos de uso, aparece um modal incentivando o cadastro para não perder o progresso.
-
-### Reporte de problemas
-Botão em cada bar para reportar horário errado, endereço incorreto, bar fechado, duplicado ou qualquer outro problema. O reporte vai para a coleção `reportes` no Firestore e fica pendente para revisão pelo admin.
+### Perfil
+Avatar (emoji ou foto), estatísticas completas (bares, nota média, km, gasto), mapa de progresso por região de BH, galeria de fotos das visitas e 14 emblemas para colecionar.
 
 ### Admin
-Painel restrito por UID na coleção `admins`. Gerencia estabelecimentos, aprova sugestões da comunidade, modera comentários e gerencia usuários (banir, reativar).
+Painel para invalidar visitas suspeitas, arquivar denúncias, banir usuários, aprovar registros de Amstel pendentes e resetar ranking individual.
 
 ---
 
 ## Segurança
 
-### O que está implementado no código
-
-- `sanitizeHtml()` em `utils.js` — escapa HTML antes de qualquer saída no DOM, bloqueando XSS na raiz.
-- `filtrarTexto()` em `utils.js` — filtra palavras proibidas em comentários e descrições antes de salvar no Firestore.
-- Verificação de `banido: true` no `users/{uid}` dentro do `onAuthStateChanged`, antes de liberar qualquer acesso.
-- Admin verificado por documento na coleção `admins` separada — não por campo no perfil do usuário, o que evitaria que alguém editasse o próprio campo e escalasse privilégio.
-- Moderador verificado pelo campo `role` no documento do usuário, com permissões separadas do admin.
-- Fotos validadas por tipo (`jpeg`, `png`, `webp`) e tamanho (máx. 10 MB) antes do upload.
-- URL de foto verificada contra o domínio `firebasestorage.googleapis.com` antes de exibir, para evitar hotlink de qualquer URL arbitrária.
-
-### Regras do Firestore — resumo das decisões
-
-- Leitura global liberada para qualquer usuário autenticado.
-- `users`, `visits`, `extras`, `historico` e `xp` — escrita restrita ao próprio UID.
-- `ranking/{doc}` — escrita permitida apenas para o próprio UID, exceto o documento `feed`, que aceita qualquer usuário logado (necessário para o feed colaborativo funcionar).
-- `estabelecimentos` — escrita bloqueada para usuários comuns; apenas admin (verificado via `get()` na coleção `admins`) pode escrever.
-- `grupos` — qualquer usuário logado cria um grupo novo; edição restrita a membros do grupo.
-- `analytics/anonimos/registros` — somente `create`, sem `update` ou `delete`, para evitar manipulação de dados de acesso.
-- `admins` — escrita bloqueada pelo client; somente leitura do próprio UID.
-
-Para aplicar as regras:
+As chaves do Firebase **não ficam no repositório**. O arquivo `js/firebase.js` commitado contém apenas placeholders. Para rodar localmente:
 
 ```bash
-firebase deploy --only firestore:rules
+cp .env.example .env.local
+# preencha .env.local com as chaves reais do Console Firebase
 ```
 
-### Regras do Firebase Storage
+As variáveis necessárias:
 
-```js
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /avatars/{uid}/{allPaths=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.auth.uid == uid
-                   && request.resource.size < 5 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-    match /visitas/{uid}/{allPaths=**} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.auth.uid == uid
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-  }
-}
+```
+FIREBASE_API_KEY=
+FIREBASE_AUTH_DOMAIN=
+FIREBASE_PROJECT_ID=
+FIREBASE_STORAGE_BUCKET=
+FIREBASE_MESSAGING_SENDER_ID=
+FIREBASE_APP_ID=
 ```
 
-### Restrição da API Key
-
-No Console GCP → APIs & Services → Credentials → selecione a chave → Application restrictions → HTTP referrers → adicione `trilhabh.web.app` e `trilhabh.firebaseapp.com`. A `apiKey` é pública por design do Firebase, mas restringir domínios evita uso fora do app.
+Vale a nota padrão do Firebase: a `apiKey` identifica o projeto mas não dá acesso sem autenticação válida. Com as regras do Firestore configuradas corretamente, expor a chave é de baixo risco. Ainda assim, a boa prática é mantê-la fora do controle de versão.
 
 ---
 
@@ -180,28 +131,25 @@ No Console GCP → APIs & Services → Credentials → selecione a chave → App
 
 | Coleção | O que guarda |
 |---|---|
-| `users/{uid}` | Perfil: nome, avatar, km, favoritos |
-| `users/{uid}/visits/{barId}` | Visitas: nota, comentário, foto, timestamp |
-| `users/{uid}/extras` | Re-visitas com nova nota |
-| `estabelecimentos` | Base dos bares (fonte principal, `aprovado == true`) |
-| `ranking/{uid}` | Cache de stats para o ranking global |
-| `ranking/feed` | Feed global — array de até 200 eventos |
-| `comentarios/{barId}/posts` | Comentários por bar |
-| `comentarios/resumo` | Cache dos últimos comentários por bar |
-| `descricoes/{barId}` | Descrição colaborativa de cada bar |
-| `grupos/{grupoId}` | Dados do grupo: membros, nome, código |
-| `grupos/{grupoId}/desafios` | Desafios ativos do grupo |
-| `xp/{uid}` | XP do usuário por período: mês, ano, total |
-| `admins/{uid}` | UIDs com acesso ao painel admin |
-| `reportes` | Reportes de problema enviados pelos usuários |
-| `analytics/anonimos` | Acessos anônimos — 1 por hora por device |
-| `analytics/usuarios/acessos/{uid}` | Contagem de acessos de usuários logados |
+| `users/{uid}` | Perfil: nome, avatar, grupos, contato |
+| `users/{uid}/visits/{barId}` | Check-ins com nota, foto, km, valor gasto |
+| `users/{uid}/extras` | Bares fora do roteiro oficial |
+| `ranking/{uid}` | Cache do ranking: totalVisitas, media, km, etc |
+| `ranking/feed` | Feed global — array dos últimos 200 eventos |
+| `grupos/{codigo}` | Grupos: membros, roteiro, sugestões |
+| `amstel/ranking` | Ranking de consumo de Amstel |
+| `amstel/registros/pendentes` | Fotos aguardando aprovação do admin |
+| `amstel/registros/aprovados` | Registros aprovados e contabilizados |
+| `comentarios/{barId}/posts` | Avaliações por bar |
+| `comentarios/resumo` | Cache resumido de avaliações para leitura rápida |
+| `descricoes/{barId}` | Descrições dos pratos enviadas pelos usuários |
+| `denuncias` | Denúncias de conteúdo para revisão do admin |
 
-A mesma nota do documento `ranking/feed` que vale aqui: ele guarda até 200 eventos num único array e aceita escrita de qualquer usuário logado. Funciona bem para volume pequeno; se o app escalar, o correto é mover a escrita para uma Cloud Function que valida o conteúdo antes de persistir.
+O documento `ranking/feed` merece uma nota: ele guarda até 200 eventos num único array e aceita escrita de qualquer usuário logado, que é o que permite o feed colaborativo funcionar sem uma Cloud Function no meio. O lado ruim é que um usuário pode, tecnicamente, sobrescrever eventos de outros no array. Para a escala do evento (grupo de amigos) isso nunca foi um problema, mas num projeto com volume maior o certo seria mover a escrita do feed para uma Cloud Function que valida antes de persistir.
 
 ---
 
-## Sistema de emblemas
+## Emblemas
 
 ### Por quantidade de visitas
 
@@ -213,105 +161,68 @@ A mesma nota do documento `ranking/feed` que vale aqui: ele guarda até 200 even
 | 🥇 Mestre dos Botecos | 20 bares |
 | 👑 Lenda Viva | 40 bares |
 | 🐐 O GOAT | 80 bares |
-| *(+ 4 níveis)* | até 1000 bares |
 
 ### Por região completa
-Um emblema para cada uma das 7 regiões de BH ao completar todos os bares dela, mais um emblema especial por completar as sete regiões.
+Um emblema para cada uma das 7 regiões de BH (Sul, Centro, Leste, Nordeste, Noroeste, Norte, Oeste), mais um emblema especial por completar todas as sete.
 
 ---
 
 ## Estrutura de arquivos
 
 ```
-trilhaBH/
-├── www/
-│   ├── css/
-│   │   └── app.css
-│   ├── images/
-│   │   ├── logo.png
-│   │   ├── fundo-claro.png
-│   │   ├── fundo-escuro.png
-│   │   └── header.png
-│   └── js/
-│       ├── config.js           # Constantes globais, TTLs, emblemas, rankings, VIBES, init Firebase
-│       ├── auth.js             # Login, cadastro, modo anônimo, reset, onAuthStateChanged, tutorial
-│       ├── app.js              # Lógica central: visitas, stats, ranking, feed, grupos, desafios
-│       ├── descobrir.js        # Tela Descobrir: listagem, filtros, busca, avaliação inline
-│       ├── avaliacao.js        # Bottom sheet de avaliação, favoritos, marcar visita
-│       ├── mapa.js             # Mapa Leaflet, geolocalização, lista por distância
-│       ├── feed.js             # Feed, reações, comentários, fotos
-│       ├── perfil.js           # Perfil, avatar, grupos, sugestão de bar
-│       ├── roteiro.js          # Roteiros do grupo, mapa de rota, sugestões
-│       ├── ranking_temporal.js # Ranking por mês/ano/hall com XP
-│       ├── trilhas.js          # Trilhas temáticas, carrossel, progresso
-│       ├── nav.js              # Navegação entre abas, animações, perfil público
-│       ├── admin.js            # Painel admin
-│       ├── eventos.js          # Eventos e desafios do grupo
-│       ├── splash.js           # Animação de carregamento
-│       ├── utils.js            # sanitizeHtml, filtrarTexto, cache, notif, emblemas, upload
-│       ├── verificacao.js      # Reporte de problemas em bares
-│       ├── data.js             # Base estática de estabelecimentos (fallback offline)
-│       └── bares_grid.json     # Metadados de layout dos cards
-├── android/                    # Projeto Android gerado pelo Capacitor
-├── index.html                  # Entry point
-├── manifest.json               # Manifesto PWA
-├── sw.js                       # Service Worker (cache offline, auto-update)
-├── firebase.json               # Firebase Hosting
-├── capacitor.config.json       # Configuração Capacitor/Android
-├── atualizar_tipos.js          # Script para atualizar o campo `tipo` no data.js em lote
-└── package.json
+comida-de-buteco/
+├── index/
+│   └── landpage.html       # HTML principal — estrutura e imports
+├── css/
+│   ├── base.css            # Variáveis CSS, reset, layout global
+│   ├── components.css      # Cards, botões, badges reutilizáveis
+│   ├── login.css           # Tela de login e modais de auth
+│   └── pages.css           # Estilos específicos de cada aba
+├── js/
+│   ├── firebase.js         # Config Firebase (placeholders no repo)
+│   ├── data.js             # Dados estáticos: bares, emblemas, configs
+│   ├── renders.js          # Estado global, cache, modais, utilitários
+│   ├── auth.js             # Login, cadastro, onboarding, tutorial
+│   ├── bares.js            # Lista de bares, filtros, busca, avaliação
+│   ├── visitas.js          # Check-in, foto, upload Storage, notas
+│   ├── ranking.js          # Ranking global/grupo, cache, atualização
+│   ├── feed.js             # Feed social, reações, likes, denúncias
+│   ├── perfil.js           # Perfil, emblemas, stats, avatar, gastos
+│   ├── grupos.js           # Grupos, roteiro colaborativo, sugestões
+│   ├── mapa.js             # Leaflet, GPS, mapa de regiões de BH
+│   ├── amstel.js           # Ranking Amstel, registro, aprovação
+│   ├── login.js            # Reset de senha
+│   └── admin.js            # Painel administrativo
+├── manifest.json           # PWA manifest
+├── sw.js                   # Service Worker (cache offline)
+├── firebase.json           # Configuração de deploy Firebase Hosting
+├── firestore.rules         # Regras de segurança do Firestore
+├── .env.example            # Template das variáveis de ambiente
+└── .gitignore
 ```
 
 ---
 
 ## Como rodar localmente
 
-**Pré-requisitos:** Node.js v18+ e Firebase CLI (`npm install -g firebase-tools`).
+O projeto não precisa de build — é HTML/CSS/JS puro servido estaticamente.
 
 ```bash
-git clone https://github.com/henriquesouza1832001-eng/trilhaBH.git
-cd trilhaBH
+git clone https://github.com/seu-usuario/rota-di-buteco-2026.git
+cd rota-di-buteco-2026
 
-npm install
+cp .env.example .env.local
+# edite .env.local com suas chaves reais do Console Firebase
 
-# copie o template e preencha com as credenciais do seu projeto Firebase
-cp www/js/config.example.js www/js/config.js
-
-# servidor local recomendado:
-firebase serve
-# ou alternativa simples:
-npx serve www
+# qualquer servidor estático funciona:
+npx serve .
+# ou
+python3 -m http.server 8080
 ```
 
----
-
-## Build Android
-
-```bash
-npx cap sync android
-npx cap open android   # abre no Android Studio para gerar o APK
-```
+Acesse `http://localhost:8080/index/landpage.html`.
 
 ---
 
-## Deploy
-
-```bash
-firebase login
-firebase use --add   # selecione o projeto trilhabh
-firebase deploy --only hosting
-```
-
----
-
-## O que ainda não está redondo
-
-- O modo anônimo guarda tudo no `localStorage`, então trocar de dispositivo ou limpar o cache apaga o progresso sem recuperação possível.
-- O documento `ranking/feed` ainda não tem validação server-side. Um usuário logado pode, tecnicamente, sobrescrever eventos de outros no array. Para a escala atual isso não é um risco real, mas é uma dívida técnica conhecida.
-- A base de estabelecimentos em `data.js` é o fallback offline, mas se o Firestore estiver disponível ela é ignorada. Qualquer atualização na coleção `estabelecimentos` não reflete automaticamente no `data.js` — isso precisa ser feito manualmente com o script `atualizar_tipos.js`.
-- Não existe um arquivo de DDL ou seed versionado para as coleções do Firestore. Subir o app num projeto Firebase zerado exige recriar a estrutura manualmente.
-
----
-
-*Projeto independente, sem fins lucrativos.*
-*© 2026 Trilha BH. Todos os direitos reservados.*
+*Feito com 🍺 para o Comida di Buteco BH 2026.*
+*Projeto pessoal — uso interno. Não destinado à redistribuição.*
